@@ -47,12 +47,14 @@ class userConfig():
             ret = sorted(ret, key=ticket.get_status)
         return ret
     def print_tickets(self):
-        header =    '++====================================+============+============+========++'
-        separator = '++------------------------------------+------------+------------+--------++'
         if self.full_txid:
+            header =    '++==================================================================+============+============+========++'
+            separator = '++------------------------------------------------------------------+------------+------------+--------++'
             mask = '|| %64s | %10s | %10s | %6s ||'
             indent = (" " * 60)
         else:
+            header =    '++====================================+============+============+========++'
+            separator = '++------------------------------------+------------+------------+--------++'
             mask = '|| %34s | %10s | %10s | %6s ||'
             indent = (" " * 30)
 
@@ -104,7 +106,7 @@ class ticket():
 
 
 parser = argparse.ArgumentParser(description='Check Split Ticket status.')
-parser.add_argument('path', metavar='F', type=str, nargs='?', default=False,
+parser.add_argument('path', metavar='filename', type=str, nargs='?', default=False,
                     help='path where to find the splitticketbuyer data files. (default to ~/.splitticketbuyer)')
 parser.add_argument('--date', dest='order', action='store_const',
                     const='date', default='status',
