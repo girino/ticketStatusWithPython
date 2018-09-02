@@ -1,6 +1,7 @@
-##'~~~~~~~~~~~~~~~~')
-##'by Bruno Parodi ')
-##'~~~~~~~~~~~~~~~~')
+##'~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+##' Originaly by Bruno Parodi ')
+##' Adapted by Girino Vey     ')
+##'~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
 from bs4 import BeautifulSoup
 from os.path import expanduser
