@@ -41,11 +41,25 @@ class userConfig():
                     return p
             raise Exception('Cannot find splitticketbuyer data path. Try passing it as a parameter')
     def get_tickets(self):
-        ret = [ticket(id) for id in self.split_ticket_txid()]
+        load = 0
+        ret = []
+        for id in self.split_ticket_txid():
+            ret.append(ticket(id))
+            self.printbar(load)
+            load += 1
         ret = sorted(ret, key=ticket.get_date)
         if self.order != 'date':
             ret = sorted(ret, key=ticket.get_status)
         return ret
+
+    def printbar(self, status):
+        size = 54 #comprimento na tela da barra
+        total = len(self.all_split_tickets()) #100%
+        print('\r',end='')
+        print(f'{"||"} LOADING {"":{status + 1}} '
+              f'{(status / total) * 100:{".2f" if (status / total) * 10 < 1 else ".1f"}}% '
+              f'{"":{size - status}}||',end='')
+
     def print_tickets(self):
         if self.full_txid:
             header =    '++==================================================================+============+============+========++'
@@ -63,13 +77,30 @@ class userConfig():
         print(header)
 
         tickets = self.get_tickets()
+        live = voted = immature = 0
         for t in tickets:
             if t != tickets[0]:
                 print(separator)
             txid = t.get_txid()
             if not self.full_txid:
                 txid = txid[:31] + '...'
-            print( mask % (txid, t.get_date(), t.get_date_voted(), t.get_status()) )
+            print(mask % (txid, t.get_date(), t.get_date_voted(), t.get_status()))
+
+            #print resume
+            if t.get_status().lower() == 'live':
+                live += 1
+            elif t.get_status().lower() == 'voted':
+                voted += 1
+            elif t.get_status().lower() == 'immature':
+                immature += 1
+            total = live + voted + immature
+        print(separator)
+        print(f'||{"":12}'
+              f'Total: {total:2} | '
+              f'Voted: {voted:2} | '
+              f'Live: {live:2} | '
+              f'Immature: {immature:2}'
+              f'{"":12}||')
         print(header)
 
 class ticket():
@@ -104,21 +135,21 @@ class ticket():
     def get_date_voted(self):
         return self.date_voted
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Check Split Ticket status.')
+    parser.add_argument('path', metavar='filename', type=str, nargs='?', default=False,
+                        help='path where to find the splitticketbuyer data files. (default to ~/.splitticketbuyer)')
+    parser.add_argument('--date', dest='order', action='store_const',
+                        const='date', default='status',
+                        help='sorts by date (default: sorts by status then by date)')
+    parser.add_argument('--full', dest='full_txid', action='store_const',
+                        const=True, default=False,
+                        help='prints full txid (might be larger than screen).')
 
-parser = argparse.ArgumentParser(description='Check Split Ticket status.')
-parser.add_argument('path', metavar='filename', type=str, nargs='?', default=False,
-                    help='path where to find the splitticketbuyer data files. (default to ~/.splitticketbuyer)')
-parser.add_argument('--date', dest='order', action='store_const',
-                    const='date', default='status',
-                    help='sorts by date (default: sorts by status then by date)')
-parser.add_argument('--full', dest='full_txid', action='store_const',
-                    const=True, default=False,
-                    help='prints full txid (might be larger than screen).')
+    args = parser.parse_args()
 
-args = parser.parse_args()
-
-user = userConfig(args.path, args.order, args.full_txid)
-user.print_tickets()
+    user = userConfig(args.path, args.order, args.full_txid)
+    user.print_tickets()
 
 
-raw_input('\nPress ENTER to close.')
+    input('\nPress ENTER to close.')
